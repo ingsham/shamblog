@@ -1,12 +1,12 @@
-import { Suspense } from "react";
-import LoginForm from "@/components/admin/LoginForm";
+import { redirect } from 'next/navigation';
+import LoginForm from '@/components/LoginForm';
+import { isAdmin } from '@/lib/auth';
 
-export const metadata = { title: "Admin sign in" };
+export const dynamic = 'force-dynamic';
 
-export default function AdminLoginPage() {
-  return (
-    <Suspense fallback={null}>
-      <LoginForm />
-    </Suspense>
-  );
+export default async function LoginPage({ searchParams }) {
+  if (await isAdmin()) redirect('/admin');
+  const params = await searchParams;
+  const next = typeof params?.next === 'string' ? params.next : '/admin';
+  return <LoginForm next={next} />;
 }

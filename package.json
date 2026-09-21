@@ -1,33 +1,21 @@
 {
-  "name": "sham-blog",
-  "version": "0.1.0",
+  "name": "sham",
+  "version": "1.0.0",
   "private": true,
+  "engines": {
+    "node": ">=18.18.0"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint",
-    "db:setup": "node scripts/setup-db.mjs"
+    "test": "node tests/run.mjs && node tests/integration.mjs && node tests/check.mjs",
+    "seed": "node scripts/seed.mjs"
   },
   "dependencies": {
-    "@fontsource-variable/fraunces": "^5.3.0",
-    "@fontsource-variable/inter": "^5.3.0",
-    "@vercel/blob": "^2.8.0",
-    "bcryptjs": "^3.0.3",
-    "date-fns": "^4.4.0",
-    "jose": "^6.2.12",
-    "next": "16.3.5",
-    "pg": "^8.23.0",
-    "react": "19.2.8",
-    "react-dom": "19.2.8",
-    "react-markdown": "^10.1.0",
-    "remark-gfm": "^4.0.1",
-    "uuid": "^14.0.2"
-  },
-  "devDependencies": {
-    "@tailwindcss/postcss": "^4",
-    "eslint": "^9",
-    "eslint-config-next": "16.3.5",
-    "tailwindcss": "^4"
+    "next": "^15.3.0",
+    "pg": "^8.13.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
   }
 }
