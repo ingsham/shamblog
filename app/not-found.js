@@ -1,19 +1,21 @@
-import Link from 'next/link';
-
-export const metadata = { title: 'Page not found' };
+import Link from "next/link";
 
 export default function NotFound() {
   return (
-    <div className="shell" style={{ padding: '120px 20px', textAlign: 'center' }}>
-      <p className="kicker" style={{ justifyContent: 'center' }}>404</p>
-      <h1 style={{ fontSize: 'clamp(2rem, 6vw, 3.4rem)', margin: '16px 0 12px', letterSpacing: '-0.045em' }}>
-        That page has moved on
+    <div className="mx-auto max-w-xl px-5 py-28 text-center">
+      <p className="font-display text-6xl font-bold text-accent-ink">404</p>
+      <h1 className="mt-4 font-display text-2xl font-semibold">
+        This page doesn&apos;t exist
       </h1>
-      <p style={{ color: 'var(--ink-soft)', maxWidth: '44ch', margin: '0 auto 26px' }}>
-        The link may be out of date, or the story may have been unpublished. The front page has the
-        latest.
+      <p className="mt-2 text-muted">
+        The story you&apos;re looking for may have been moved or unpublished.
       </p>
-      <Link href="/" className="button">Go to the front page</Link>
+      <Link
+        href="/"
+        className="mt-6 inline-block rounded-full bg-ink text-paper px-5 py-2.5 text-sm font-medium hover:bg-accent-ink transition-colors"
+      >
+        Back to homepage
+      </Link>
     </div>
   );
 }

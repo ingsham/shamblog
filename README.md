@@ -1,160 +1,139 @@
 # SHAM
 
-A news and blog site: front page, sections, search, an admin newsroom behind a
-password, image uploads straight from your computer, likes and comments that
-need no reader account, and sharing to the usual social networks.
+A modern news & blog platform: an admin dashboard for writing and publishing
+articles (with drag-and-drop image uploads), and a public site where anyone
+can read, like and comment without creating an account.
 
-Built with Next.js 15 (App Router) and Postgres. Nothing else to sign up for.
+Built with Next.js 16 (App Router), Tailwind CSS, and Postgres. No Prisma,
+no heavyweight CMS — just a small, readable codebase you can extend.
 
----
+## Features
 
-## Put it online in about ten minutes
+- **Public site** — magazine-style homepage, individual article pages,
+  Markdown article content, social share buttons (X, Facebook, LinkedIn,
+  WhatsApp, Telegram, copy link)
+- **Likes & comments, no login required** — visitors are tracked by an
+  anonymous cookie so they can't like the same post twice, but never need an
+  account
+- **Admin dashboard** (`/admin`) — protected by a single admin login
+  - Write posts in Markdown with a live preview
+  - Drag-and-drop (or click to browse) image upload from your desktop,
+    stored on Vercel Blob
+  - Publish / unpublish / delete posts
+  - Edit or delete any comment
+  - Manually edit or reset a post's like count
+- Modern, distinctive editorial design (self-hosted Fraunces + Inter fonts —
+  no external font requests at runtime)
 
-### 1. Push this to GitHub
-
-```bash
-cd sham
-git init
-git add .
-git commit -m "SHAM"
-git branch -M main
-git remote add origin https://github.com/YOUR-USERNAME/sham.git
-git push -u origin main
-```
-
-### 2. Import it into Vercel
-
-Go to vercel.com → **Add New… → Project** → pick the `sham` repository →
-**Import**. Leave every build setting alone; Vercel detects Next.js. Click
-**Deploy**. The first deploy will succeed and show a "needs a database" notice —
-that's expected.
-
-### 3. Add the database
-
-In your new Vercel project: **Storage → Create Database → Neon (Postgres) →
-Create**, then connect it to the project. Vercel sets `DATABASE_URL` for you.
-
-Any Postgres works — Neon, Supabase, Railway, your own server. If you use one
-of those, copy its connection string into an environment variable named
-`DATABASE_URL` yourself.
-
-### 4. Set your password
-
-**Settings → Environment Variables**, add these two to every environment
-(Production, Preview, Development):
-
-| Name | Value |
-| --- | --- |
-| `ADMIN_PASSWORD` | the password you will type to sign in |
-| `ADMIN_SECRET` | any long random string — run `openssl rand -base64 32` |
-
-### 5. Redeploy
-
-**Deployments → the top one → ⋯ → Redeploy.** Open the site. The tables are
-created on the first request, so there is no migration step.
-
-### 6. Write
-
-Go to `https://your-site.vercel.app/admin`, sign in, and publish. If you want a
-few sample stories to look at first, run `npm run seed` locally with
-`DATABASE_URL` set.
-
----
-
-## Running it on your own machine
+## 1. Local setup
 
 ```bash
 npm install
-cp .env.example .env.local     # fill in DATABASE_URL, ADMIN_PASSWORD, ADMIN_SECRET
-npm run dev                    # http://localhost:3000
-npm test                       # 62 checks: logic, API behaviour, structure
+cp .env.example .env.local   # then fill in the values, see below
+npm run db:setup             # creates the posts/likes/comments tables
+npm run dev
 ```
 
----
+Open http://localhost:3000. Sign in at `/admin/login` with the
+`ADMIN_EMAIL` / `ADMIN_PASSWORD` you set in `.env.local`.
 
-## What is in the box
+You'll need a Postgres database even for local development — see the
+options below. Image uploads only work once `BLOB_READ_WRITE_TOKEN` is set
+(see step 3); everything else works without it.
 
-**For readers**
+## 2. Environment variables
 
-- Front page with a lead story, a section of highlights and a numbered river of
-  the rest, plus a most-read list
-- Eight sections, each with its own colour running through the kicker, links,
-  reading progress bar and like button
-- Search across headlines, standfirsts, tags and full text
-- Light and dark themes, following the device and remembered per visitor
-- Reading progress bar, reading time, view counts
-- Likes and comments with no sign-up, kept per device by cookie
-- Share to X, Facebook, WhatsApp, LinkedIn, Telegram, Reddit and email, plus
-  copy link and the phone's native share sheet
-- Friday email sign-up
-- Preview cards when a link is pasted into a chat or timeline, `sitemap.xml`,
-  `rss.xml`, `robots.txt` and article structured data
+| Variable | Description |
+|---|---|
+| `DATABASE_URL` | Postgres connection string |
+| `ADMIN_EMAIL` | The email you'll log in with |
+| `ADMIN_PASSWORD` | The password you'll log in with |
+| `JWT_SECRET` | A long random string used to sign admin session cookies |
+| `BLOB_READ_WRITE_TOKEN` | Auto-created when you enable Vercel Blob (step 3) |
+| `NEXT_PUBLIC_SITE_NAME` | Defaults to `SHAM` |
+| `NEXT_PUBLIC_SITE_URL` | Your site's public URL (used for share links and SEO tags) |
 
-**For you**
+Generate a `JWT_SECRET` with:
 
-- `/admin` behind a password, with a signed, httpOnly session cookie
-- Markdown editor with a formatting toolbar and a live preview
-- Lead picture by click or drag-and-drop from your desktop; pictures inside the
-  body with one button. Large photos are shrunk in your browser before upload
-- Drafts, publishing, unpublishing, and pinning a story to the top
-- Per-story section, byline, tags, web address and picture credit
-- Likes and views editable by hand — reader likes keep counting on top
-- Comment moderation: edit the text or the name, pin, hide or delete
-- Subscriber list ready to copy
+```bash
+node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+```
 
----
+## 3. Deploying to Vercel
 
-## How things are stored
+### a) Push this project to a Git repo
 
-| Table | Holds |
-| --- | --- |
-| `articles` | every story, draft or published |
-| `comments` | reader comments, with pinned and hidden flags |
-| `likes` | one row per device per story |
-| `images` | uploaded pictures, served from `/api/images/…` and cached forever |
-| `subscribers` | email sign-ups |
+Create a new repo on GitHub (or GitLab/Bitbucket) and push this folder to
+it, then import it at https://vercel.com/new.
 
-Pictures live in the database rather than a separate file service, so there is
-one thing to set up instead of two. They are resized to 1800px wide in the
-browser before upload and capped at 4 MB. If you start publishing very
-image-heavy galleries, move them to Vercel Blob or S3 and store the URL in
-`cover_image` instead — the rest of the site does not change.
+### b) Add a Postgres database
 
-## Making it yours
+Any Postgres works. The easiest options that integrate directly with
+Vercel:
 
-| What | Where |
-| --- | --- |
-| Section names and colours | `lib/utils.js` |
-| Colours, type and spacing | the tokens at the top of `app/globals.css` |
-| Site name and description | `app/layout.js` |
-| Footer and about text | `components/SiteFooter.js`, `app/(site)/about/page.js` |
-| Fonts | the Google Fonts link in `app/layout.js`, then `--font-display` / `--font-body` |
+- **Vercel Postgres / Neon** — in your Vercel project, go to
+  **Storage → Create Database → Postgres**. Vercel adds `DATABASE_URL` to
+  your project automatically.
+- **Supabase / Railway / your own Postgres** — create a database there and
+  copy its connection string into the `DATABASE_URL` environment variable
+  on your Vercel project (**Settings → Environment Variables**).
 
-## Tests
+Either way, once you have a connection string, run the schema against it
+once from your machine:
 
-`npm test` runs three suites with plain Node — no install, no build, no database
-needed:
+```bash
+DATABASE_URL="your-connection-string" npm run db:setup
+```
 
-- **logic** — the Markdown renderer (including the escaping that stops a pasted
-  `<script>` from running), slugs, excerpts, reading time, session signing
-- **API behaviour** — the real route handlers, end to end against a live
-  in-memory SQL database: signing in and out, publishing, drafts, duplicate web
-  addresses, uploads, commenting while signed out, throttling, the spam
-  honeypot, liking and unliking, one like per device, moderation, editing the
-  like and view totals by hand, and deleting a story taking its comments and
-  likes with it
-- **structure** — every import resolves, every class name exists in the
-  stylesheet, every JSX tag is closed, and every `fetch` in the UI hits a route
-  that implements that method
+### c) Enable image uploads (Vercel Blob)
 
-## A note on security
+In your Vercel project: **Storage → Create Database → Blob**. This
+automatically adds `BLOB_READ_WRITE_TOKEN` to your project's environment
+variables — you don't need to copy anything by hand. Without this step,
+everything else works, but image uploads in the admin dashboard will show
+a friendly error until it's enabled.
 
-- The admin session is an HMAC-signed, httpOnly cookie; a forged or expired one
-  is rejected.
-- Sign-in attempts are throttled, and comments are rate-limited per address with
-  a honeypot field for bots.
-- Story text is escaped before any HTML is produced, so a pasted `<script>` tag
-  is printed, not run. `javascript:` links are stripped.
-- `/admin` and `/api` are excluded from `robots.txt`.
-- Change `ADMIN_PASSWORD` from anything you have shared, and never commit
-  `.env.local`.
+### d) Set the remaining environment variables
+
+In **Vercel → Settings → Environment Variables**, add:
+
+- `ADMIN_EMAIL`
+- `ADMIN_PASSWORD`
+- `JWT_SECRET`
+- `NEXT_PUBLIC_SITE_NAME` (optional, defaults to `SHAM`)
+- `NEXT_PUBLIC_SITE_URL` — set this to your real deployed URL (e.g.
+  `https://sham.vercel.app`) once you know it; it's used for social share
+  links and SEO tags
+
+### e) Deploy
+
+Click **Deploy**. Once it's live, visit `/admin/login`, sign in, and
+publish your first article.
+
+## Project structure
+
+```
+app/
+  page.js                     Homepage (featured post + grid)
+  post/[slug]/page.js         Public article page
+  admin/login/page.js         Admin sign-in
+  admin/(dashboard)/          Admin dashboard, protected route group
+  api/posts/...               Public API: list, single post, like, comments
+  api/admin/...               Admin-only API: posts CRUD, comments, upload
+components/                   UI components (cards, like button, share, etc.)
+lib/                          Database access, auth, formatting helpers
+db/schema.sql                 Postgres schema
+scripts/setup-db.mjs          Applies schema.sql to $DATABASE_URL
+proxy.js                      Route protection for /admin and /api/admin
+```
+
+## Notes
+
+- Comments and likes require no account — anonymous visitors are tracked
+  by a long-lived, unguessable cookie, purely to prevent double-liking and
+  attribute comments to a name they type in.
+- The admin area is protected both by `proxy.js` (Next.js's routing layer)
+  and a second check inside each admin API route, so there's no single
+  point of failure for auth.
+- Article content is Markdown, rendered with `react-markdown` +
+  `remark-gfm` (so tables, task lists, etc. all work).

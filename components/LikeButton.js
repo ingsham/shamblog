@@ -1,68 +1,82 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { IconHeart } from '@/components/Icons';
+import { useEffect, useState } from "react";
 
-export default function LikeButton({ articleId, initialLikes }) {
-  const [likes, setLikes] = useState(initialLikes);
+function HeartIcon({ filled }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill={filled ? "currentColor" : "none"}
+      stroke="currentColor"
+      strokeWidth="1.8"
+      className="h-5 w-5"
+    >
+      <path
+        d="M12 20.2s-7.2-4.4-9.6-9C.9 7.7 2.4 4.5 5.6 4c2-.3 3.8.7 6.4 3 2.6-2.3 4.4-3.3 6.4-3 3.2.5 4.7 3.7 3.2 7.2-2.4 4.6-9.6 9-9.6 9Z"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+export default function LikeButton({ postId, initialLikeCount }) {
   const [liked, setLiked] = useState(false);
-  const [burst, setBurst] = useState(0);
-  const [busy, setBusy] = useState(false);
+  const [count, setCount] = useState(initialLikeCount);
+  const [pending, setPending] = useState(false);
+  const [pulse, setPulse] = useState(false);
 
   useEffect(() => {
-    let cancelled = false;
-    fetch('/api/likes?articleId=' + articleId)
-      .then((r) => (r.ok ? r.json() : null))
-      .then((data) => {
-        if (!cancelled && data) {
-          setLikes(data.likes);
-          setLiked(Boolean(data.liked));
-        }
-      })
+    fetch(`/api/posts/${postId}/like`)
+      .then((res) => res.json())
+      .then((data) => setLiked(Boolean(data.liked)))
       .catch(() => {});
-    return () => {
-      cancelled = true;
-    };
-  }, [articleId]);
+  }, [postId]);
 
-  async function toggle() {
-    if (busy) return;
-    setBusy(true);
-    const next = !liked;
-    setLiked(next);
-    setLikes((n) => n + (next ? 1 : -1));
-    if (next) setBurst((n) => n + 1);
+  async function toggleLike() {
+    if (pending) return;
+    setPending(true);
+    const nextLiked = !liked;
+    setLiked(nextLiked);
+    setCount((c) => c + (nextLiked ? 1 : -1));
+    if (nextLiked) {
+      setPulse(true);
+      setTimeout(() => setPulse(false), 300);
+    }
     try {
-      const res = await fetch('/api/likes', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ articleId }),
+      const res = await fetch(`/api/posts/${postId}/like`, {
+        method: "POST",
       });
       const data = await res.json();
       if (res.ok) {
-        setLikes(data.likes);
-        setLiked(Boolean(data.liked));
+        setLiked(data.liked);
+        setCount(data.likeCount);
+      } else {
+        setLiked(!nextLiked);
+        setCount((c) => c - (nextLiked ? 1 : -1));
       }
-    } catch (err) {
-      setLiked(!next);
-      setLikes((n) => n + (next ? -1 : 1));
+    } catch {
+      setLiked(!nextLiked);
+      setCount((c) => c - (nextLiked ? 1 : -1));
     } finally {
-      setBusy(false);
+      setPending(false);
     }
   }
 
   return (
     <button
       type="button"
-      className="like-button"
-      data-liked={liked}
-      onClick={toggle}
+      onClick={toggleLike}
       aria-pressed={liked}
-      aria-label={liked ? 'Remove your like' : 'Like this article'}
+      className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition-colors ${
+        liked
+          ? "border-danger bg-danger/10 text-danger"
+          : "border-line text-ink hover:border-danger hover:text-danger"
+      }`}
     >
-      {burst > 0 ? <span key={burst} className="like-burst" aria-hidden="true" /> : null}
-      <IconHeart filled={liked} aria-hidden="true" />
-      <span>{likes}</span>
+      <span className={pulse ? "scale-125 transition-transform" : "transition-transform"}>
+        <HeartIcon filled={liked} />
+      </span>
+      {count} {count === 1 ? "like" : "likes"}
     </button>
   );
 }
