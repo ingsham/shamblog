@@ -34,6 +34,34 @@ export const viewport = {
 // Applies the saved theme before first paint so there is no flash of the wrong one.
 const THEME_SCRIPT = `try{var t=localStorage.getItem('sham-theme');if(t==='dark'||t==='light'){document.documentElement.setAttribute('data-theme',t)}}catch(e){}`;
 
+// Site-wide structured data so search engines connect the SHAM name, its
+// site search, and its publisher identity — separate from the per-article
+// NewsArticle data on the article page itself.
+function siteJsonLd() {
+  const base = siteUrl();
+  return {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'WebSite',
+        name: 'SHAM',
+        url: base,
+        potentialAction: {
+          '@type': 'SearchAction',
+          target: base + '/search?q={search_term_string}',
+          'query-input': 'required name=search_term_string',
+        },
+      },
+      {
+        '@type': 'Organization',
+        name: 'SHAM',
+        url: base,
+        logo: base + '/icon.svg',
+      },
+    ],
+  };
+}
+
 export default function RootLayout({ children }) {
   return (
     <html lang="en" suppressHydrationWarning>
@@ -45,6 +73,10 @@ export default function RootLayout({ children }) {
           href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&family=Newsreader:ital,opsz,wght@0,6..72,300..700;1,6..72,300..600&family=Fraunces:opsz,wght@9..144,500..700&display=swap"
         />
         <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(siteJsonLd()) }}
+        />
       </head>
       <body>{children}</body>
     </html>

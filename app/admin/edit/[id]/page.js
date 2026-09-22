@@ -28,6 +28,7 @@ export default async function EditArticlePage({ params }) {
     featured: article.featured,
     likes: Number(article.likes),
     views: article.views,
+    published_at: new Date(article.published_at).toISOString(),
   };
 
   return (

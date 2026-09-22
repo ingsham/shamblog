@@ -20,7 +20,15 @@ const BLANK = {
   featured: false,
   likes: '',
   views: '',
+  published_at: '',
 };
+
+function toDateInputValue(value) {
+  if (!value) return '';
+  const d = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(d.getTime())) return '';
+  return d.toISOString().slice(0, 10);
+}
 
 export default function ArticleEditor({ article = null }) {
   const router = useRouter();
@@ -37,6 +45,7 @@ export default function ArticleEditor({ article = null }) {
           likes: String(article.likes ?? ''),
           views: String(article.views ?? ''),
           tags: article.tags || '',
+          published_at: toDateInputValue(article.published_at),
         }
       : BLANK
   );
@@ -355,6 +364,16 @@ export default function ArticleEditor({ article = null }) {
                   onChange={(e) => update('author', e.target.value)}
                 />
               </div>
+            </div>
+            <div className="field">
+              <label htmlFor="published_at">Publish date</label>
+              <input
+                id="published_at"
+                className="input"
+                type="date"
+                value={form.published_at}
+                onChange={(e) => update('published_at', e.target.value)}
+              />
             </div>
             <div className="field">
               <label htmlFor="tags">Tags</label>

@@ -75,6 +75,30 @@ export default function Comments({ articleId, initialComments = [] }) {
         </h2>
       </div>
 
+      <div style={{ marginBottom: 10 }}>
+        {comments.length === 0 ? (
+          <p style={{ color: 'var(--ink-soft)', padding: '26px 0' }}>
+            Nobody has commented yet. Be the first.
+          </p>
+        ) : (
+          comments.map((comment) => (
+            <article key={comment.id} className="comment">
+              <div className="comment-avatar" aria-hidden="true">{initials(comment.name)}</div>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+                  <span className="comment-name">{comment.name}</span>
+                  <span style={{ fontSize: '0.78rem', color: 'var(--ink-faint)' }}>
+                    {timeAgo(comment.created_at)}
+                  </span>
+                  {comment.pinned ? <span className="comment-pin">Pinned</span> : null}
+                </div>
+                <p className="comment-body">{comment.body}</p>
+              </div>
+            </article>
+          ))
+        )}
+      </div>
+
       <form className="comment-form" onSubmit={submit}>
         <div className="field">
           <label htmlFor="comment-name">Your name</label>
@@ -119,30 +143,6 @@ export default function Comments({ articleId, initialComments = [] }) {
           </button>
         </div>
       </form>
-
-      <div style={{ marginTop: 10 }}>
-        {comments.length === 0 ? (
-          <p style={{ color: 'var(--ink-soft)', padding: '26px 0' }}>
-            Nobody has commented yet. Be the first.
-          </p>
-        ) : (
-          comments.map((comment) => (
-            <article key={comment.id} className="comment">
-              <div className="comment-avatar" aria-hidden="true">{initials(comment.name)}</div>
-              <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-                  <span className="comment-name">{comment.name}</span>
-                  <span style={{ fontSize: '0.78rem', color: 'var(--ink-faint)' }}>
-                    {timeAgo(comment.created_at)}
-                  </span>
-                  {comment.pinned ? <span className="comment-pin">Pinned</span> : null}
-                </div>
-                <p className="comment-body">{comment.body}</p>
-              </div>
-            </article>
-          ))
-        )}
-      </div>
     </section>
   );
 }

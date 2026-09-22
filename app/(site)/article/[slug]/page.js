@@ -20,9 +20,12 @@ export async function generateMetadata({ params }) {
   if (!article) return { title: 'Story not found' };
   const description = article.excerpt || toExcerpt(article.content, 160);
   const images = article.cover_image ? [article.cover_image] : [];
+  const tags = parseTags(article.tags);
   return {
     title: article.title,
     description,
+    keywords: [article.title, article.author, article.category, 'SHAM', ...tags],
+    authors: [{ name: article.author }],
     alternates: { canonical: '/article/' + article.slug },
     openGraph: {
       type: 'article',
@@ -31,8 +34,10 @@ export async function generateMetadata({ params }) {
       url: '/article/' + article.slug,
       images,
       publishedTime: new Date(article.published_at).toISOString(),
+      modifiedTime: new Date(article.updated_at).toISOString(),
       authors: [article.author],
       section: article.category,
+      tags,
     },
     twitter: { card: 'summary_large_image', title: article.title, description, images },
   };
@@ -66,8 +71,13 @@ export default async function ArticlePage({ params }) {
     datePublished: new Date(article.published_at).toISOString(),
     dateModified: new Date(article.updated_at).toISOString(),
     author: [{ '@type': 'Person', name: article.author }],
-    publisher: { '@type': 'Organization', name: 'SHAM' },
+    publisher: {
+      '@type': 'Organization',
+      name: 'SHAM',
+      logo: { '@type': 'ImageObject', url: siteUrl() + '/icon.svg' },
+    },
     articleSection: article.category,
+    keywords: tags.length > 0 ? tags.join(', ') : undefined,
     mainEntityOfPage: url,
   };
 
@@ -113,13 +123,11 @@ export default async function ArticlePage({ params }) {
       ) : null}
 
       <div className="article-layout">
-        <ShareBar url={url} title={article.title} layout="rail" />
-
         <div>
           <div className="prose" dangerouslySetInnerHTML={{ __html: html }} />
 
           {tags.length > 0 ? (
-            <div className="tag-row" style={{ marginTop: 36, maxWidth: 'var(--measure)' }}>
+            <div className="tag-row" style={{ marginTop: 36, maxWidth: 'var(--measure)', marginInline: 'auto' }}>
               {tags.map((tag) => (
                 <Link key={tag} href={'/search?q=' + encodeURIComponent(tag)} className="tag">
                   {tag}

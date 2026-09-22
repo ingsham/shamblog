@@ -25,6 +25,8 @@ const viewsRoute = await import('../app/api/views/route.js');
 const uploadRoute = await import('../app/api/upload/route.js');
 const imagesRoute = await import('../app/api/images/[id]/route.js');
 const subscribeRoute = await import('../app/api/subscribe/route.js');
+const messagesRoute = await import('../app/api/messages/route.js');
+const messageRoute = await import('../app/api/messages/[id]/route.js');
 const db = await import('../lib/db.js');
 
 let passed = 0;
@@ -435,6 +437,93 @@ await test('an editor can set the view total by hand', async () => {
   );
   const { article } = await res.json();
   assert.equal(article.views, 12000);
+});
+
+console.log('\nmessage us');
+
+let messageId;
+
+await test('anyone signed out can send a message', async () => {
+  signOut();
+  const res = await messagesRoute.POST(
+    post('/api/messages', {
+      kind: 'question',
+      name: 'Reader',
+      email: 'reader@example.com',
+      subject: 'A question',
+      body: 'How do I reach the editor about a correction?',
+    })
+  );
+  assert.equal(res.status, 200);
+  const { message } = await res.json();
+  messageId = message.id;
+  await signIn();
+});
+
+await test('a message without a working email is refused', async () => {
+  const res = await messagesRoute.POST(
+    post('/api/messages', { name: 'Reader', email: 'not-an-email', body: 'Hello there, this is long enough.' })
+  );
+  assert.equal(res.status, 400);
+});
+
+await test('a short message is refused', async () => {
+  const res = await messagesRoute.POST(
+    post('/api/messages', { name: 'Reader', email: 'reader@example.com', body: 'hi' })
+  );
+  assert.equal(res.status, 400);
+});
+
+await test('a bot filling the hidden field is quietly dropped', async () => {
+  const before = await db.one('SELECT COUNT(*) AS n FROM messages');
+  const res = await messagesRoute.POST(
+    post('/api/messages', {
+      name: 'Bot',
+      email: 'bot@example.com',
+      body: 'This should not be stored anywhere at all.',
+      website: 'http://spam.example',
+    })
+  );
+  assert.equal(res.status, 200);
+  const after = await db.one('SELECT COUNT(*) AS n FROM messages');
+  assert.equal(Number(after.n), Number(before.n));
+});
+
+await test('visitors cannot read the inbox', async () => {
+  signOut();
+  const res = await messagesRoute.GET();
+  assert.equal(res.status, 401);
+  await signIn();
+});
+
+await test('an editor can read the inbox', async () => {
+  const res = await messagesRoute.GET();
+  assert.equal(res.status, 200);
+  const { messages } = await res.json();
+  assert.ok(messages.some((m) => m.id === messageId));
+});
+
+await test('an editor can mark a message read', async () => {
+  const res = await messageRoute.PATCH(
+    post('/api/messages/' + messageId, { read: true }),
+    params({ id: String(messageId) })
+  );
+  const { message } = await res.json();
+  assert.ok(message.read);
+});
+
+await test('visitors cannot moderate messages', async () => {
+  signOut();
+  const res = await messageRoute.DELETE(get('/x'), params({ id: String(messageId) }));
+  assert.equal(res.status, 401);
+  await signIn();
+});
+
+await test('an editor can delete a message', async () => {
+  const res = await messageRoute.DELETE(get('/x'), params({ id: String(messageId) }));
+  assert.equal(res.status, 200);
+  const gone = await db.one('SELECT id FROM messages WHERE id = $1', [messageId]);
+  assert.equal(gone, null);
 });
 
 console.log('\nnewsletter and clean-up');

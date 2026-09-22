@@ -24,14 +24,17 @@ for (const file of walk(root)) {
   const rel = path.relative(root, file);
   // Strings are emptied first: markup written inside a string literal (XML
   // builders, placeholder text) is not JSX structure and must not be counted.
+  // This also has to happen before comments are stripped, since an
+  // attribute like accept="image/*" contains a "/*" that would otherwise be
+  // misread as the start of a block comment and swallow real markup.
   const src = fs
     .readFileSync(file, 'utf8')
     .replace(/=>/g, '=\u00bb')
-    .replace(/\/\*[\s\S]*?\*\//g, '')
-    .replace(/^\s*\/\/.*$/gm, '')
     .replace(/'(?:\\.|[^'\\\n])*'/g, "''")
     .replace(/"(?:\\.|[^"\\\n])*"/g, '""')
-    .replace(/`(?:\\.|[^`\\])*`/g, '``');
+    .replace(/`(?:\\.|[^`\\])*`/g, '``')
+    .replace(/\/\*[\s\S]*?\*\//g, '')
+    .replace(/^\s*\/\/.*$/gm, '');
   if (!/<[a-zA-Z]/.test(src)) continue;
   scanned += 1;
 

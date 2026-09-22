@@ -13,7 +13,7 @@ import {
   IconX,
 } from '@/components/Icons';
 
-export default function ShareBar({ url, title, layout = 'row' }) {
+export default function ShareBar({ url, title }) {
   const [toast, setToast] = useState('');
   const [canNativeShare, setCanNativeShare] = useState(false);
 

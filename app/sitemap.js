@@ -10,6 +10,7 @@ export default async function sitemap() {
   return [
     { url: base, lastModified: new Date(), changeFrequency: 'hourly', priority: 1 },
     { url: base + '/about', changeFrequency: 'yearly', priority: 0.3 },
+    { url: base + '/contact', changeFrequency: 'yearly', priority: 0.3 },
     { url: base + '/search', changeFrequency: 'daily', priority: 0.4 },
     ...CATEGORIES.map((name) => ({
       url: base + '/category/' + name.toLowerCase(),

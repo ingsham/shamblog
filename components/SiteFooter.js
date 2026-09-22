@@ -30,13 +30,17 @@ export default function SiteFooter() {
             <ul>
               <li><Link href="/about">About</Link></li>
               <li><Link href="/search">Search</Link></li>
-              <li><a href="/rss.xml">RSS feed</a></li>
-              <li><Link href="/admin">Newsroom login</Link></li>
+              <li><Link href="/contact">Message us</Link></li>
             </ul>
           </div>
         </div>
         <div className="footer-note">
-          <span>© {new Date().getFullYear()} SHAM. All rights reserved.</span>
+          <span>
+            <Link href="/admin" aria-label="Newsroom login" style={{ textDecoration: 'none' }}>
+              ©
+            </Link>{' '}
+            {new Date().getFullYear()} SHAM. All rights reserved.
+          </span>
           <span>Built to be read.</span>
         </div>
       </div>

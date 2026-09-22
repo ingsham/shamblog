@@ -17,11 +17,11 @@ export default function AboutPage() {
         </p>
       </header>
 
-      <div className="prose" style={{ padding: '34px 0' }}>
+      <div className="prose about-prose" style={{ padding: '34px 0' }}>
         <p>
           Every story here is written and edited in one room. That means fewer pieces than a wire
           service, and more time on each one. Sections run from world affairs and business through
-          technology, culture and sport, and each carries its own colour so you can find your way
+          technology, poems and sport, and each carries its own colour so you can find your way
           around at a glance.
         </p>
         <h2>Reading and joining in</h2>
@@ -32,8 +32,9 @@ export default function AboutPage() {
         </p>
         <h2>Get in touch</h2>
         <p>
-          Tips, corrections and complaints are all welcome. Reply to the Friday email, or leave a
-          comment on the piece in question and the desk will see it.
+          Tips, corrections and complaints are all welcome. Want to submit an article for
+          publication, ask a question, or need support? Visit <Link href="/contact">Message us</Link>{' '}
+          and the desk will see it.
         </p>
         <p>
           <Link href="/">Back to the front page</Link>
