@@ -8,13 +8,13 @@ export const metadata = {
     template: '%s · SHAM',
   },
   description:
-    'SHAM is an independent publication covering world affairs, business, technology, culture and sport, with reporting that explains why it matters.',
+    'SHAM is an independent publication covering world affairs, business, technology, poems and sport, with reporting that explains why it matters.',
   applicationName: 'SHAM',
   openGraph: {
     type: 'website',
     siteName: 'SHAM',
     title: 'SHAM — reporting worth your time',
-    description: 'Independent reporting on world affairs, business, technology, culture and sport.',
+    description: 'Independent reporting on world affairs, business, technology, poems and sport.',
     url: '/',
   },
   twitter: { card: 'summary_large_image', title: 'SHAM', description: 'Reporting worth your time.' },
@@ -24,8 +24,8 @@ export const metadata = {
 
 export const viewport = {
   themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#f7f4ec' },
-    { media: '(prefers-color-scheme: dark)', color: '#18140f' },
+    { media: '(prefers-color-scheme: light)', color: '#ffffff' },
+    { media: '(prefers-color-scheme: dark)', color: '#0a1420' },
   ],
   width: 'device-width',
   initialScale: 1,

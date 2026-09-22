@@ -33,7 +33,7 @@ export async function GET() {
     '  <channel>',
     '    <title>SHAM</title>',
     '    <link>' + escapeHtml(base) + '</link>',
-    '    <description>Independent reporting on world affairs, business, technology, culture and sport.</description>',
+    '    <description>Independent reporting on world affairs, business, technology, poems and sport.</description>',
     '    <language>en</language>',
     '    <lastBuildDate>' + new Date().toUTCString() + '</lastBuildDate>',
     items,
