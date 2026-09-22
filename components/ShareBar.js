@@ -58,7 +58,7 @@ export default function ShareBar({ url, title }) {
   }
 
   return (
-    <div className={layout === 'rail' ? 'share-rail' : 'share-list'}>
+    <div className="share-list">
       {targets.map(({ name, href, Icon }) => (
         <a
           key={name}

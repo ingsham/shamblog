@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import SiteHeader from '@/components/SiteHeader';
 import SiteFooter from '@/components/SiteFooter';
+import BackToTop from '@/components/BackToTop';
 import { listArticles, tryDb } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
@@ -30,6 +31,7 @@ export default async function SiteLayout({ children }) {
       <SiteHeader />
       <main id="main">{children}</main>
       <SiteFooter />
+      <BackToTop />
     </>
   );
 }
